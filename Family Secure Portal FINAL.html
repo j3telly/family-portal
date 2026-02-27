@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Family Secure Portal</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+    font-family:Arial;
+    margin:0;
+    background:#0f172a;
+    color:white;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+}
+
+.container{
+    width:100%;
+    max-width:600px;
+    background:#1e293b;
+    padding:20px;
+    border-radius:24px;
+}
+
+input,textarea,select{
+    width:100%;
+    padding:12px;
+    margin-top:10px;
+    border-radius:12px;
+    border:none;
+    background:#020617;
+    color:white;
+}
+
+button{
+    width:100%;
+    padding:14px;
+    margin-top:12px;
+    border:none;
+    border-radius:12px;
+    cursor:pointer;
+}
+
+.primary{background:#2563eb;color:white;}
+.secondary{background:#16a34a;color:white;}
+.danger{background:#dc2626;color:white;}
+
+.grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:8px;
+}
+
+.key{
+    padding:18px;
+    font-size:22px;
+    background:#020617;
+    border-radius:12px;
+}
+
+#dialDisplay{
+    font-size:26px;
+    text-align:center;
+    padding:14px;
+    background:#020617;
+    border-radius:12px;
+    margin-top:10px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h2 style="text-align:center">Family Secure Portal</h2>
+
+<input type="password" id="sitePassword" placeholder="Access Code">
+<button class="primary" onclick="login()">ENTER</button>
+
+<div id="portal" style="display:none">
+
+<h3>Members</h3>
+<ul>
+<li>Mia</li>
+<li>Baby John</li>
+<li>Dana</li>
+</ul>
+
+<h3>Messaging</h3>
+
+<select id="recipient">
+<option>Mia</option>
+<option>Baby John</option>
+<option>Dana</option>
+</select>
+
+<textarea id="messageBox" rows="3" placeholder="Type message"></textarea>
+
+<input type="password" id="familyKey" placeholder="Encryption Key">
+
+<button class="primary" onclick="encryptMessage()">
+Encrypt Message
+</button>
+
+<button class="secondary" onclick="sendSMS()">
+Send Text Message
+</button>
+
+<div id="output" style="
+margin-top:15px;
+padding:12px;
+background:#020617;
+border-radius:12px;
+word-break:break-all;
+font-size:13px;">
+</div>
+
+<hr>
+
+<h3>Dialer</h3>
+
+<div id="dialDisplay"></div>
+
+<div class="grid">
+
+<button class="key" onclick="dialPress('1')">1</button>
+<button class="key" onclick="dialPress('2')">2</button>
+<button class="key" onclick="dialPress('3')">3</button>
+
+<button class="key" onclick="dialPress('4')">4</button>
+<button class="key" onclick="dialPress('5')">5</button>
+<button class="key" onclick="dialPress('6')">6</button>
+
+<button class="key" onclick="dialPress('7')">7</button>
+<button class="key" onclick="dialPress('8')">8</button>
+<button class="key" onclick="dialPress('9')">9</button>
+
+<button class="key" onclick="dialPress('*')">*</button>
+<button class="key" onclick="dialPress('0')">0</button>
+<button class="key" onclick="dialPress('#')">#</button>
+
+</div>
+
+<button class="secondary" onclick="dialDelete()">Delete</button>
+<button class="primary" onclick="dialCall()">Call</button>
+<button class="danger" onclick="emergencyCall()">Emergency Call</button>
+
+</div>
+
+</div>
+
+<script>
+
+const SITE_PASSWORD="Stellything2";
+const TRUST_KEY="family_portal_trust";
+
+function login(){
+if(document.getElementById("sitePassword").value===SITE_PASSWORD){
+localStorage.setItem(TRUST_KEY,"1");
+document.getElementById("portal").style.display="block";
+}
+else alert("Access Denied");
+}
+
+window.onload=function(){
+if(localStorage.getItem(TRUST_KEY)==="1"){
+document.getElementById("portal").style.display="block";
+}
+}
+
+/* Dialer */
+
+let dialNumber="";
+
+function dialPress(val){
+dialNumber+=val;
+document.getElementById("dialDisplay").innerText=dialNumber;
+}
+
+function dialDelete(){
+dialNumber=dialNumber.slice(0,-1);
+document.getElementById("dialDisplay").innerText=dialNumber;
+}
+
+function dialCall(){
+if(!dialNumber){alert("Enter number");return;}
+window.location.href="tel:"+dialNumber;
+}
+
+function emergencyCall(){
+window.location.href="tel:+10000000000";
+}
+
+/* Encryption */
+
+async function encryptMessage(){
+
+const message=document.getElementById("messageBox").value;
+
+if(!message){
+alert("Enter message");
+return;
+}
+
+const encoder=new TextEncoder();
+
+const data=encoder.encode(message);
+
+const base64=btoa(String.fromCharCode(...data));
+
+document.getElementById("output").innerText=base64;
+}
+
+function sendSMS(){
+
+const text=document.getElementById("output").innerText;
+
+if(!text){alert("Encrypt message first");return;}
+
+window.location.href="sms:?body="+encodeURIComponent(text);
+}
+
+</script>
+
+</body>
+</html>
